@@ -1,0 +1,17 @@
+The system will be a web-page replicating the function of the automatons pygame script.
+
+The system will contain an options overlay, which can be called by pressing a "settings" button.  The options overlay will have multiple tabs.
+-The first tab will be the "Grid" tab, with the choice of grid size, update rate, and colors.
+-The second tab will be the "Rules" tab, which will give a choice of:
+	-Specify rules (allows manual entry of ruleset)
+	-Random rules (with option to change rules every n seconds)
+	-Advanced rules (allows manual entry of advanced ruleset.)
+-The third tab will be the "Advanced" tab, which allows the user to specify what cells will be considered when evaluating the rulesets.
+	-The tab will be composed of two sections: Rule Mask and Change Rule.
+	-The Rule Mask section will have a grid representing a rule.  Clicking a cell will enable/disable it.
+		-A disabled cell means that it has no bearing on the value.  That is, a disabled cell represents two rules where 1 -> 1, 0 -> 0.
+	-The Change Rule section will have a grid representing a rule.  Any cells that cannot be used will be marked as disabled.
+The main function of the system will be a dynamic automaton grid.  The automaton grid will consist of an n by m display, stretching to the full size of the window, updating at the specified rate based on the specified rules.  There will be a pause/play button, and a settings button.
+
+Possible improvements:
+-Resize tab text to make sure it fits

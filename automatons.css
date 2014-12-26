@@ -1,0 +1,218 @@
+/*
+	z-indices:
+	3:Control buttons
+	2:Settings table
+	1:Blackout
+	0:Automaton Grid
+*/
+
+body {
+	padding:0px;
+	margin:0px;
+	font-family: "Arial", sans-serif;
+	-webkit-user-select: none;  /* Chrome all / Safari all */
+	-moz-user-select: none;     /* Firefox all */
+	-ms-user-select: none;      /* IE 10+ */
+	cursor:default;
+}
+
+/*CONTROL BUTTON STUFF*/
+
+div.controlButtonContainer {
+	position:absolute;
+	z-index:3;
+	right:2%;
+	top:2%;
+	opacity:1.0;
+	width:5%;
+	height:10%;
+}
+
+div.controlButtonContainer:hover {
+	opacity:0.9;
+}
+
+div.controlButton {
+	background-color:#555555;
+	opacity:inherit;
+	width:100%;
+	height:100%;
+}
+
+div.controlButton:hover {
+	opacity:1.0;
+}
+
+/*GRID STUFF*/
+
+div.automatonGrid {
+	/*Position, color, size*/
+	position:absolute;
+	z-index:0;
+	left:0px;
+	top:0px;
+	width:100%;
+	height:100%;
+}
+
+table.automatonTable {
+	width:100%;
+	height:100%;
+	padding:0px;
+	border-collapse:collapse
+}
+
+table.automatonTable td.on{
+	background-color:#009900;
+}
+
+table.automatonTable td.off{
+	background-color:#990000;
+}
+
+table.automatonTable td.disabled{
+	background-color:#000099;
+}
+
+/*SETTINGS STUFF - BLACKOUT*/
+
+div.blackout {
+	/*Full-page div, colored black, translucent*/
+	position:absolute;
+	z-index:1;
+	left:0px;
+	top:0px;
+	background-color:black;
+	width:100%;
+	height:100%;
+	opacity:0.3;
+}
+
+/*SETTINGS STUFF - WRAPPERS*/
+
+div.settingsTable {
+	box-sizing:border-box;
+	position:absolute;
+	z-index:2;
+	left:0px;
+	top:0px;
+	/*Set up centering for settingsBox*/
+	display:table;
+	width:100%;
+	height:100%;
+}
+
+div.settingsCell {
+	/*Set up centering for settingsBox*/
+	box-sizing:inherit;
+	display:table-cell;
+	vertical-align:middle;
+}
+
+div.settingsBox {
+	box-sizing:inherit;
+	margin-left:auto;
+	margin-right:auto;
+	width:50%;
+	height:60%;
+	background-color:#222222;
+	box-shadow:0px 4px 50px 5px #333333;
+	color:#CCCCCC;
+	overflow:hidden;
+}
+
+/*SETTINGS STUFF - TABS*/
+
+div.settingsTabRow {
+	box-sizing:inherit;
+	width:98%;
+	height:9%;
+	margin-bottom:0.5%;
+	margin-top:0.5%;
+	margin-left:auto;
+	margin-right:auto;
+	background-color:inherit;
+	overflow:hidden;
+	font-size:2.2em;
+}
+
+div.settingsTab {
+	box-sizing:inherit;
+	float:left;
+	background-color:#444444;
+	height:100%;
+	width:20%;
+	border:2px solid #333333;
+	padding-left:0.1em;
+	color:#CCCCCC;
+	overflow:hidden;
+	margin-right:0.1em;
+}
+
+div.settingsTabSelected {
+	box-sizing:inherit;
+	float:left;
+	background-color:#666666;
+	height:100%;
+	width:20%;
+	border:2px solid #555555;
+	padding-left:0.1em;
+	color:#CCCCCC;
+	overflow:hidden;
+	margin-right:0.1em;
+}
+
+div.settingsExitButton {
+	box-sizing:inherit;
+	float:right;
+	background-color:#551111;
+	height:100%;
+	width:5%;
+	text-align:center;
+	border:2px solid #440000;
+	color:#CCCCCC;
+	overflow:hidden;
+	margin-right:0.1em;
+}
+
+/*SETTINGS STUFF - PANES*/
+
+div.settingsPaneRow {
+	box-sizing:inherit;
+	width:98%;
+	height:87%;
+	margin-left:auto;
+	margin-right:auto;
+	background-color: #444444;
+	overflow:hidden;
+	border:2px solid #555555;
+}
+
+div.settingsPaneSelected {
+	box-sizing:inherit;
+	width:100%;
+	height:100%;
+}
+
+div.settingsPane {
+	display:none;
+}
+
+div.settingsPaneHalf {
+	box-sizing:inherit;
+	float:left;
+	width:50%;
+	height:100%;
+}
+
+div.ruleWrapper {
+	box-sizing:inherit;
+	padding:2%;
+	height:75%;
+}
+
+div.ruleControlWrapper {
+	box-sizing:inherit;
+	padding:2%;
+	height:25%;
+}
