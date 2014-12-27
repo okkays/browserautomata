@@ -15,11 +15,10 @@ var Settings = {
 	ruleLength: 1
 };
 
-//The data model grid.
+//The data model grids.
 var automatonGrid = null;
-
-//The root table element for the main grid.
-var mainTable = null;
+var ruleMaskGrid = null;
+var ruleBuildGrid = null;
 
 //WINDOW FUNCTIONS
 
@@ -40,7 +39,7 @@ function init() {
 	//Settings - Grid
 	document.getElementById("inputGridWidth").addEventListener("input", validateGridWidth);
 	document.getElementById("inputGridHeight").addEventListener("input", validateGridHeight);
-	document.getElementById("buttonUpdateGridSize").addEventListener("click", resizeGrid);
+	document.getElementById("buttonUpdateGridSize").addEventListener("click", resizeMainGrid);
 	document.getElementById("buttonCheckerGrid").addEventListener("click", checkerGrid);
 	document.getElementById("buttonScrambleGrid").addEventListener("click", scrambleGrid);
 	document.getElementById("buttonClearGrid").addEventListener("click", clearGrid);
@@ -70,7 +69,11 @@ function init() {
 	var defaultHeight = document.getElementById("inputGridHeight").value;
 	automatonGrid = new AutomatonGrid(defaultWidth, defaultHeight, null);
 	automatonGrid.scramble();
-	displayGridFromScratch(automatonGrid);
+	ruleMaskGrid = new AutomatonGrid(Settings.ruleLength, Settings.ruleLength, null);
+	ruleBuildGrid = new AutomatonGrid(Settings.ruleLength, Settings.ruleLength, null);
+	displayGridFromScratch(automatonGrid, document.getElementById("divAutomatonGrid"));
+	displayGridFromScratch(ruleMaskGrid, document.getElementById("divRuleMask"));
+	displayGridFromScratch(ruleBuildGrid, document.getElementById("divRuleBuild"));
 }
 
 function resizeWindow() {
@@ -79,18 +82,23 @@ function resizeWindow() {
 
 //GRID FUNCTIONS
 
-function resizeGrid() {
-	var inputGridWidth = document.getElementById("inputGridWidth");
-	var inputGridHeight = document.getElementById("inputGridHeight");
-	if (inputGridWidth.value === "") {
-		inputGridWidth.value = 1;
+function resizeMainGrid() {
+	resizeGrid(document.getElementById("inputGridWidth").value,
+				document.getElementById("inputGridHeight").value,
+				automatonGrid,
+				document.getElementById("divAutomatonGrid"));
+}
+
+function resizeGrid(width, height, grid, root) {
+	if (width === "") {
+		width = 1;
 	}
-	if (inputGridHeight.value === "") {
-		inputGridHeight.value = 1;
+	if (height === "") {
+		height = 1;
 	}
-	automatonGrid.setWidth(inputGridWidth.value);
-	automatonGrid.setHeight(inputGridHeight.value);
-	displayGridFromScratch(automatonGrid);
+	grid.setWidth(width);
+	grid.setHeight(height);
+	displayGridFromScratch(grid, root);
 }
 
 function updateRate() {
@@ -122,22 +130,22 @@ function pauseGrid(event) {
 }
 
 function stepGrid() {
-	displayGridFromChanges(mainTable, automatonGrid.tick());
+	displayGridFromChanges(document.getElementById("divAutomatonGrid").firstChild, automatonGrid.tick());
 }
 
 function checkerGrid() {
 	automatonGrid.checker();
-	displayGridFromScratch(automatonGrid);
+	displayGridFromScratch(automatonGrid, document.getElementById("divAutomatonGrid"));
 }
 
 function scrambleGrid() {
 	automatonGrid.scramble();
-	displayGridFromScratch(automatonGrid);
+	displayGridFromScratch(automatonGrid, document.getElementById("divAutomatonGrid"));
 }
 
 function clearGrid() {
 	automatonGrid.clear();
-	displayGridFromScratch(automatonGrid);
+	displayGridFromScratch(automatonGrid, document.getElementById("divAutomatonGrid"));
 }
 
 function cellMouseDown(event) {
@@ -159,16 +167,27 @@ function cellEntered(event) {
 	}
 }
 
-function cellClicked(event) {
+function cellClicked(event, grid) {
 	var rowIndex = event.target.parentNode.rowIndex;
 	var colIndex = event.target.cellIndex;
-	automatonGrid.toggle(rowIndex, colIndex);
-	displayGridFromChanges(mainTable, [[rowIndex, colIndex]]);
+	//Find our parent table
+	var table = event.target.parentNode;
+	while (table.tagName != "TABLE") {
+		table = table.parentNode;
+	}
+	//TODO: Find a better way to do this.
+	if (table.parentNode.id == "divAutomatonGrid") {
+		automatonGrid.toggle(rowIndex, colIndex);
+	} else if (table.parentNode.id == "divRuleMask") {
+		ruleMaskGrid.toggle(rowIndex, colIndex);
+	} else if (table.parentNode.id == "divRuleBuild") {
+		ruleBuildGrid.toggle(rowIndex, colIndex);
+	}
+	displayGridFromChanges(table, [[rowIndex, colIndex]]);
 }
 
-//Clears the displayed grid, and displays the given grid.
-function displayGridFromScratch(automatonGrid) {
-	var root = document.getElementById("divAutomatonGrid");
+//Clears the displayed grid, and displays the given grid under the specified root element.
+function displayGridFromScratch(grid, root) {
 	//Remove and recreate the table.
 	while (root.firstChild) {
 		root.removeChild(root.firstChild);
@@ -176,10 +195,10 @@ function displayGridFromScratch(automatonGrid) {
 	var table = document.createElement('table');
 	table.className = "automatonTable";
 	//Create and add new rows/columns.
-	for (var rowIndex = 0; rowIndex < automatonGrid.height; rowIndex++) {
+	for (var rowIndex = 0; rowIndex < grid.height; rowIndex++) {
 		var row = table.insertRow(rowIndex);
-		for (var colIndex = 0; colIndex < automatonGrid.width; colIndex++) {
-			var value = automatonGrid.get(rowIndex, colIndex);
+		for (var colIndex = 0; colIndex < grid.width; colIndex++) {
+			var value = grid.get(rowIndex, colIndex);
 			var td = row.insertCell(colIndex);
 			td.className = (value ? "on" : "off");
 			td.addEventListener("mousedown", cellMouseDown);
@@ -188,7 +207,6 @@ function displayGridFromScratch(automatonGrid) {
 		}
 	}
 	root.appendChild(table);
-	mainTable = table;
 }
 
 //Updates the given table by toggling the given list of cells.
@@ -301,13 +319,18 @@ function validateUpdateRate(event) {
 function decrementRuleLength() {
 	if (Settings.ruleLength > 1) {
 		Settings.ruleLength -= 2;
+		resizeGrid(Settings.ruleLength, Settings.ruleLength, ruleMaskGrid, document.getElementById("divRuleMask"));
+		resizeGrid(Settings.ruleLength, Settings.ruleLength, ruleBuildGrid, document.getElementById("divRuleBuild"));
 	}
 	document.getElementById("ruleControlLength").innerHTML = Settings.ruleLength;
+	
 }
 
 function incrementRuleLength() {
 	Settings.ruleLength += 2;
 	document.getElementById("ruleControlLength").innerHTML = Settings.ruleLength;
+	resizeGrid(Settings.ruleLength, Settings.ruleLength, ruleMaskGrid, document.getElementById("divRuleMask"));
+	resizeGrid(Settings.ruleLength, Settings.ruleLength, ruleBuildGrid, document.getElementById("divRuleBuild"));
 }
 
 
