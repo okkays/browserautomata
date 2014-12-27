@@ -216,3 +216,21 @@ div.ruleControlWrapper {
 	padding:2%;
 	height:25%;
 }
+
+div.ruleControlButton {
+	float:left;
+	width:33%;
+	height:100%;
+	background:#777777;
+	text-align:center;
+	font-size:4em;
+}
+
+div.ruleControlOutput {
+	float:left;
+	width:34%;
+	height:100%;
+	background:#888888;
+	text-align:center;
+	font-size:4em;
+}

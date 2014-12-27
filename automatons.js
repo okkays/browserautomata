@@ -1,13 +1,26 @@
+//Contains GUI state information.
 var GUIStatus = {
 	mouseDown: false,
 	settingsOpen: true,
 	paused: true,
-	pauseInterval: null
+	pauseInterval: null,
+	prevGridWidthInput: "",
+	prevGridHeightInput: "",
+	prevUpdateRateInput: ""
 };
 
+//Contains user-specified information about the grid.
+var Settings = {
+	updateRate: 0,
+	ruleLength: 1
+};
+
+//The data model grid.
 var automatonGrid = null;
+
+//The root table element for the main grid.
 var mainTable = null;
-var rate = 0;
+
 //WINDOW FUNCTIONS
 
 function init() {
@@ -25,8 +38,8 @@ function init() {
 	document.getElementById("buttonClear").addEventListener("click", clearGrid);
 	document.getElementById("buttonRandomRules").addEventListener("click", randomizeRules);
 	//Settings - Grid
-	document.getElementById("inputGridWidth").addEventListener("input", validateGridSize);
-	document.getElementById("inputGridHeight").addEventListener("input", validateGridSize);
+	document.getElementById("inputGridWidth").addEventListener("input", validateGridWidth);
+	document.getElementById("inputGridHeight").addEventListener("input", validateGridHeight);
 	document.getElementById("buttonUpdateGridSize").addEventListener("click", resizeGrid);
 	document.getElementById("buttonCheckerGrid").addEventListener("click", checkerGrid);
 	document.getElementById("buttonScrambleGrid").addEventListener("click", scrambleGrid);
@@ -36,9 +49,15 @@ function init() {
 	//Settings - Rules
 	document.getElementById("buttonRuleset").addEventListener("click", readRulesetFromFile);
 	document.getElementById("buttonRandomizeRuleset").addEventListener("click", randomizeRules);
+	//Settings - Advanced
+	document.getElementById("ruleControlMinus").addEventListener("click", decrementRuleLength);
+	document.getElementById("ruleControlPlus").addEventListener("click", incrementRuleLength);
 	
-	//Get the update rate
-	rate = document.getElementById("inputUpdateRate").value;
+	//Populate settings variables from default GUI.
+	Settings.updateRate = document.getElementById("inputUpdateRate").value;
+	GUIStatus.prevGridHeightInput = document.getElementById("inputGridHeight").value;
+	GUIStatus.prevGridWidthInput = document.getElementById("inputGridWidth").value;
+	GUIStatus.prevUpdateRateInput =  document.getElementById("inputUpdateRate").value;
 	
 	//Pause everything
 	pauseGrid();
@@ -79,10 +98,10 @@ function updateRate() {
 	if (inputUpdateRate.value == "") {
 		inputUpdateRate.value = 0;
 	}
-	rate = inputUpdateRate.value;
+	Settings.updateRate = inputUpdateRate.value;
 	if (!GUIStatus.paused) {
 		clearInterval(GUIStatus.pauseInterval);
-		GUIStatus.pauseInterval = setInterval(stepGrid, rate);
+		GUIStatus.pauseInterval = setInterval(stepGrid, Settings.updateRate);
 	}
 }
 
@@ -90,7 +109,7 @@ function playGrid(event) {
 	GUIStatus.paused = false;
 	document.getElementById("buttonPlay").style.display = "none";
 	document.getElementById("buttonPause").style.display = "block";
-	GUIStatus.pauseInterval = setInterval(stepGrid, rate);
+	GUIStatus.pauseInterval = setInterval(stepGrid, Settings.updateRate);
 }
 
 function pauseGrid(event) {
@@ -234,18 +253,34 @@ function resizeTabText() {
 	}
 }
 
-function validateGridSize(event) {
+function validateGridWidth(event) {
 	var input = event.target.value;
 	if (input === "") {
 		return;
 	}
 	if (isNaN(input)) {
-		event.target.value = "";
+		event.target.value = GUIStatus.prevGridWidthInput;
 	} else if (event.target.value < 1) {
-		event.target.value = "";
-	} else {
+		event.target.value = GUIStatus.prevGridWidthInput;
+	} else if (event.target.value % 1 !== 0) {
 		event.target.value = Math.floor(input);
 	}
+	GUIStatus.prevGridWidthInput = event.target.value;
+}
+
+function validateGridHeight(event) {
+	var input = event.target.value;
+	if (input === "") {
+		return;
+	}
+	if (isNaN(input)) {
+		event.target.value = GUIStatus.prevGridHeightInput;
+	} else if (event.target.value < 1) {
+		event.target.value = GUIStatus.prevGridHeightInput;
+	} else if (event.target.value % 1 !== 0) {
+		event.target.value = Math.floor(input);
+	}
+	GUIStatus.prevGridHeightInput = event.target.value;
 }
 
 function validateUpdateRate(event) {
@@ -254,13 +289,27 @@ function validateUpdateRate(event) {
 		return;
 	}
 	if (isNaN(input)) {
-		event.target.value = "";
+		event.target.value = GUIStatus.prevUpdateRateInput;
 	} else if (event.target.value < 1) {
-		event.target.value = "";
-	} else {
+		event.target.value = GUIStatus.prevUpdateRateInput;
+	} else if (event.target.value % 1 !== 0) {
 		event.target.value = Math.floor(input);
 	}
+	GUIStatus.prevUpdateRateInput = event.target.value;
 }
+
+function decrementRuleLength() {
+	if (Settings.ruleLength > 1) {
+		Settings.ruleLength -= 2;
+	}
+	document.getElementById("ruleControlLength").innerHTML = Settings.ruleLength;
+}
+
+function incrementRuleLength() {
+	Settings.ruleLength += 2;
+	document.getElementById("ruleControlLength").innerHTML = Settings.ruleLength;
+}
+
 
 window.onload = init;
 window.onresize = resizeWindow;
