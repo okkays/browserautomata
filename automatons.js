@@ -24,6 +24,8 @@ var ruleBuildGrid = null;
 
 function init() {
 	//Add event listeners
+	//General
+	document.body.addEventListener("mouseup", cellMouseUp);
 	//Tabs
 	document.getElementById("tabGrid").addEventListener("click", selectTab);
 	document.getElementById("tabRules").addEventListener("click", selectTab);
@@ -202,7 +204,6 @@ function displayGridFromScratch(grid, root) {
 			var td = row.insertCell(colIndex);
 			td.className = (value ? "on" : "off");
 			td.addEventListener("mousedown", cellMouseDown);
-			td.addEventListener("mouseup", cellMouseUp);
 			td.addEventListener("mouseover", cellEntered);
 		}
 	}
