@@ -45,27 +45,35 @@
 							</div>
 						</div>
 						<div id="paneRules" class="settingsPane">
-							Upload a ruleset: <input type="file" id="fileRule"/><input type="button" id="buttonRuleset" value="Apply"/>
-							<br/>
-							<input id="buttonRandomizeRuleset" type="button" value="Randomize Ruleset"/>
-							<div class="ruleControlWrapper">
-								<div id="ruleControlMinus" class="ruleControlButton">-</div>
-								<div id="ruleControlLength" class="ruleControlOutput">1</div>
-								<div id="ruleControlPlus" class="ruleControlButton">+</div>
-							</div>
-						</div>
-						<div id="paneAdvanced" class="settingsPane">
 							<div class="settingsPaneHalf">
+								<div class="ruleHeader">Change Ruleset</div>
+								<div class="ruleChangeContent">
+									Upload a ruleset:<br/>
+									<input type="file" id="fileRule"/> <input type="button" id="buttonRuleset" value="Apply"/><br/>
+									Randomize ruleset:<br/>
+									<input id="buttonRandomizeRuleset" type="button" value="Randomize"/><br/>
+									Ruleset settings:<br/>
+									<input type="checkbox">TODO: Enable mask</input><br/>
+									<input type="checkbox">TODO: Disable "flashing" random rules</input>
+								</div>
+							</div>
+							<div class="settingsPaneHalf">
+								<div class="ruleHeader">Edit Rule Mask</div>
 								<div id="divRuleMask" class="ruleWrapper">
 									<table class="automatonTable">									
 										<tr><td class="on"></tr>
 									</table>
 								</div>
 								<div class="ruleControlWrapper">
-									<div id="ruleControlAdvancedMinus" class="ruleControlButton">-</div>
-									<div id="ruleControlAdvancedLength" class="ruleControlOutput">1</div>
-									<div id="ruleControlAdvancedPlus" class="ruleControlButton">+</div>
+									<div id="ruleControlMinus" class="ruleControlButton">-</div>
+									<div id="ruleControlLength" class="ruleControlOutput">1</div>
+									<div id="ruleControlPlus" class="ruleControlButton">+</div>
 								</div>
+							</div>
+						</div>
+						<div id="paneAdvanced" class="settingsPane">
+							<div class="settingsPaneHalf">
+								Stuff.
 							</div>
 							<div class="settingsPaneHalf">
 								<div id="divRuleBuild" class="ruleWrapper">
@@ -74,7 +82,8 @@
 									</table>
 								</div>
 								<div class="ruleControlWrapper">
-									
+									<div id="" class="ruleControlButton"></div>
+									<div id="" class="ruleControlOutput"></div>
 								</div>
 							</div>
 						</div>

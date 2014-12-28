@@ -206,16 +206,32 @@ div.settingsPaneHalf {
 	height:100%;
 }
 
+div.ruleHeader {
+	box-sizing:inherit;
+	padding:2%;
+	height:10%;
+	width:100%;
+	text-align:center;
+}
+
+div.ruleChangeContent {
+	padding:2%;
+	height:90%;
+	width:100%;
+	line-height:1.5em;
+}
+
 div.ruleWrapper {
 	box-sizing:inherit;
 	padding:2%;
 	height:75%;
+	width:100%;
 }
 
 div.ruleControlWrapper {
 	box-sizing:inherit;
 	padding:2%;
-	height:25%;
+	height:15%;
 }
 
 div.ruleControlButton {
@@ -234,4 +250,9 @@ div.ruleControlOutput {
 	background:#888888;
 	text-align:center;
 	font-size:4em;
+}
+
+input[type="file"] {
+	background-color:white;
+	border-radius: 2px;
 }

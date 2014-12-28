@@ -53,8 +53,6 @@ function init() {
 	document.getElementById("ruleControlMinus").addEventListener("click", decrementRuleLength);
 	document.getElementById("ruleControlPlus").addEventListener("click", incrementRuleLength);
 	//Settings - Advanced
-	document.getElementById("ruleControlAdvancedMinus").addEventListener("click", decrementRuleLength);
-	document.getElementById("ruleControlAdvancedPlus").addEventListener("click", incrementRuleLength);
 	
 	//Populate settings variables from default GUI.
 	Settings.updateRate = document.getElementById("inputUpdateRate").value;
@@ -66,7 +64,7 @@ function init() {
 	pauseGrid();
 	
 	//Set the size of the tab item text
-	resizeTabText();
+	resizeSettingsText();
 	
 	//Create the grid
 	var defaultWidth = document.getElementById("inputGridWidth").value;
@@ -81,7 +79,16 @@ function init() {
 }
 
 function resizeWindow() {
-	resizeTabText();
+	resizeSettingsText();
+}
+
+//Resize all of the variable size settings texts
+function resizeSettingsText() {
+	resizeElementText("rowTabs");
+	resizeElementText("ruleControlMinus");
+	resizeElementText("ruleControlLength");
+	resizeElementText("ruleControlPlus");
+	resizeClassText("ruleHeader");
 }
 
 //GRID FUNCTIONS
@@ -136,7 +143,7 @@ function pauseGrid(event) {
 }
 
 function stepGrid() {
-	displayGridFromChanges(document.getElementById("divAutomatonGrid").firstChild, automatonGrid.tick(), "on", "off");
+	displayGridFromChanges(document.getElementById("divAutomatonGrid").firstChild, automatonGrid, automatonGrid.tick(), "on", "off");
 }
 
 function checkerGrid() {
@@ -193,25 +200,21 @@ function cellClicked(event, grid) {
 
 function mainGridCellClicked(tableClicked, rowIndex, colIndex) {
 	automatonGrid.toggle(rowIndex, colIndex);
-	displayGridFromChanges(tableClicked, [[rowIndex, colIndex]], "on", "off");
+	displayGridFromChanges(tableClicked, automatonGrid, [[rowIndex, colIndex]], "on", "off");
 }
 
 function ruleMaskCellClicked(tableClicked, rowIndex, colIndex) {
 	var ruleBuildTable = document.getElementById("divRuleBuild").firstChild;
 	//Disable/enable the cell on the rulemask.
 	ruleMaskGrid.toggle(rowIndex, colIndex);
-	displayGridFromChanges(tableClicked, [[rowIndex, colIndex]], "disabled", "on");
+	displayGridFromChanges(tableClicked, ruleMaskGrid, [[rowIndex, colIndex]], "disabled", "on");
 	if (ruleMaskGrid.get(rowIndex, colIndex)) { //IF DISABLING:
-		//Turn off the cell on the rule builder grid.
-		if (ruleBuildGrid.get(rowIndex, colIndex)) {
-			ruleBuildGrid.toggle(rowIndex, colIndex);
-		}
 		//Disable the cell on the rule builder table.
-		displayGridFromChanges(ruleBuildTable, [[rowIndex, colIndex]], "disabled", "disabled");
+		displayGridFromChanges(ruleBuildTable, ruleBuildGrid, [[rowIndex, colIndex]], "disabled", "disabled");
 	} else {
 		//IF ENABLING:
-		//Enable the cell on the rule builder table (should be off)
-		displayGridFromChanges(ruleBuildTable, [[rowIndex, colIndex]], "off", "off");
+		//Enable the cell on the rule builder table
+		displayGridFromChanges(ruleBuildTable, ruleBuildGrid, [[rowIndex, colIndex]], "on", "off");
 	}
 }
 
@@ -219,7 +222,7 @@ function ruleBuildCellClicked(tableClicked, rowIndex, colIndex) {
 	//Only change anything if the cell isn't disabled.
 	if (!ruleMaskGrid.get(rowIndex, colIndex)) {
 		ruleBuildGrid.toggle(rowIndex, colIndex);
-		displayGridFromChanges(tableClicked, [[rowIndex, colIndex]], "on", "off");
+		displayGridFromChanges(tableClicked, ruleBuildGrid, [[rowIndex, colIndex]], "on", "off");
 	}
 }
 
@@ -245,14 +248,14 @@ function displayGridFromScratch(grid, root, onClass, offClass) {
 	root.appendChild(table);
 }
 
-//Updates the given table by toggling the given list of cells.
+//Updates the given table by checking the given list of cells against the table.
 //Changes is formatted: [[rowIndex, colIndex], [rowIndex, colIndex], ...]
-function displayGridFromChanges(table, changes, onClass, offClass) {
+function displayGridFromChanges(table, grid, changes, onClass, offClass) {
 	for (var changeIndex in changes) {
 		var rowIndex = changes[changeIndex][0];
 		var colIndex = changes[changeIndex][1];
 		var cell = table.rows[rowIndex].cells[colIndex];
-		cell.className = (cell.className == onClass ? offClass : onClass);
+		cell.className = (grid.get(rowIndex, colIndex) ? onClass : offClass);
 	}
 }
 
@@ -270,6 +273,10 @@ function readRulesetFromFile() {
 	reader.onload = function(event) {
 		var contents = event.target.result;
 		automatonGrid.ruleset = new Ruleset(contents.split("\n"));
+		//Update the rule length.
+		Settings.ruleLength = automatonGrid.ruleset.length;
+		document.getElementById("ruleControlLength").innerHTML = Settings.ruleLength;
+		resizeRuleGrids();
 	}
 	reader.readAsText(selector.files[0]);
 }
@@ -286,7 +293,7 @@ function toggleSettings(event) {
 	document.getElementById("wrapperSettings").style.display = GUIStatus.settingsOpen ? "none" : "table";
 	document.getElementById("divBlackout").style.display = GUIStatus.settingsOpen ? "none" : "inline";
 	GUIStatus.settingsOpen = !GUIStatus.settingsOpen;
-	resizeTabText();
+	resizeSettingsText();
 }
 
 function selectTab(event) {
@@ -298,12 +305,24 @@ function selectTab(event) {
 	document.getElementById("paneGrid").className = event.target.id == "tabGrid" ? "settingsPaneSelected" : "settingsPane";
 	document.getElementById("paneRules").className = event.target.id == "tabRules" ? "settingsPaneSelected" : "settingsPane";
 	document.getElementById("paneAdvanced").className = event.target.id == "tabAdvanced" ? "settingsPaneSelected" : "settingsPane";
+	resizeSettingsText();
 }
 
-function resizeTabText() {
-	if (GUIStatus.settingsOpen) {
-		var rowTabs = document.getElementById("rowTabs")
-		rowTabs.style.fontSize = rowTabs.clientHeight - (rowTabs.clientHeight / 4);
+//Resizes the text of the element with the given ID
+function resizeElementText(id) {
+	var element = document.getElementById(id);
+	if (element.style.display != "none") {
+		element.style.fontSize = element.clientHeight - (element.clientHeight / 4);
+	}
+}
+
+//Resizes the text of the elements in the given class
+function resizeClassText(className) {
+	var elements = document.getElementsByClassName(className);
+	for (var i = 0; i < elements.length; i++) {
+		if (elements[i].style.display != "none") {
+			elements[i].style.fontSize = elements[i].clientHeight - (elements[i].clientHeight / 4);
+		}
 	}
 }
 
@@ -358,13 +377,11 @@ function decrementRuleLength() {
 		resizeRuleGrids();
 	}
 	document.getElementById("ruleControlLength").innerHTML = Settings.ruleLength;
-	document.getElementById("ruleControlAdvancedLength").innerHTML = Settings.ruleLength;
 }
 
 function incrementRuleLength() {
 	Settings.ruleLength += 2;
 	document.getElementById("ruleControlLength").innerHTML = Settings.ruleLength;
-	document.getElementById("ruleControlAdvancedLength").innerHTML = Settings.ruleLength;
 	resizeRuleGrids();
 }
 
@@ -382,7 +399,7 @@ function resizeRuleGrids() {
 			}
 		}
 	}
-	displayGridFromChanges(ruleBuildTable, disabledList, "disabled", "disabled");
+	displayGridFromChanges(ruleBuildTable, ruleBuildGrid, disabledList, "disabled", "disabled");
 }
 
 window.onload = init;
