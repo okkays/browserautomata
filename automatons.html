@@ -48,6 +48,11 @@
 							Upload a ruleset: <input type="file" id="fileRule"/><input type="button" id="buttonRuleset" value="Apply"/>
 							<br/>
 							<input id="buttonRandomizeRuleset" type="button" value="Randomize Ruleset"/>
+							<div class="ruleControlWrapper">
+								<div id="ruleControlMinus" class="ruleControlButton">-</div>
+								<div id="ruleControlLength" class="ruleControlOutput">1</div>
+								<div id="ruleControlPlus" class="ruleControlButton">+</div>
+							</div>
 						</div>
 						<div id="paneAdvanced" class="settingsPane">
 							<div class="settingsPaneHalf">
@@ -57,9 +62,9 @@
 									</table>
 								</div>
 								<div class="ruleControlWrapper">
-									<div id="ruleControlMinus" class="ruleControlButton">-</div>
-									<div id="ruleControlLength" class="ruleControlOutput">1</div>
-									<div id="ruleControlPlus" class="ruleControlButton">+</div>
+									<div id="ruleControlAdvancedMinus" class="ruleControlButton">-</div>
+									<div id="ruleControlAdvancedLength" class="ruleControlOutput">1</div>
+									<div id="ruleControlAdvancedPlus" class="ruleControlButton">+</div>
 								</div>
 							</div>
 							<div class="settingsPaneHalf">
@@ -69,7 +74,7 @@
 									</table>
 								</div>
 								<div class="ruleControlWrapper">
-									Seconds
+									
 								</div>
 							</div>
 						</div>
@@ -80,7 +85,7 @@
 		<!--GRID STUFF-->
 		<div class="automatonGrid" id="divAutomatonGrid">
 			<table class="automatonTable">
-				<tr><td class="disabled"></tr>
+				<tr><td class="disabled">There has been an error!  Let me know, and I'll try to fix it :D</td></tr>
 			</table>
 		</div>
 	</body>

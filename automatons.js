@@ -17,7 +17,7 @@ var Settings = {
 
 //The data model grids.
 var automatonGrid = null;
-var ruleMaskGrid = null;
+var ruleMaskGrid = null; //Note: This grid treats "enabled" as off, and "disabled" as on.
 var ruleBuildGrid = null;
 
 //WINDOW FUNCTIONS
@@ -50,9 +50,11 @@ function init() {
 	//Settings - Rules
 	document.getElementById("buttonRuleset").addEventListener("click", readRulesetFromFile);
 	document.getElementById("buttonRandomizeRuleset").addEventListener("click", randomizeRules);
-	//Settings - Advanced
 	document.getElementById("ruleControlMinus").addEventListener("click", decrementRuleLength);
 	document.getElementById("ruleControlPlus").addEventListener("click", incrementRuleLength);
+	//Settings - Advanced
+	document.getElementById("ruleControlAdvancedMinus").addEventListener("click", decrementRuleLength);
+	document.getElementById("ruleControlAdvancedPlus").addEventListener("click", incrementRuleLength);
 	
 	//Populate settings variables from default GUI.
 	Settings.updateRate = document.getElementById("inputUpdateRate").value;
@@ -73,9 +75,9 @@ function init() {
 	automatonGrid.scramble();
 	ruleMaskGrid = new AutomatonGrid(Settings.ruleLength, Settings.ruleLength, null);
 	ruleBuildGrid = new AutomatonGrid(Settings.ruleLength, Settings.ruleLength, null);
-	displayGridFromScratch(automatonGrid, document.getElementById("divAutomatonGrid"));
-	displayGridFromScratch(ruleMaskGrid, document.getElementById("divRuleMask"));
-	displayGridFromScratch(ruleBuildGrid, document.getElementById("divRuleBuild"));
+	displayGridFromScratch(automatonGrid, document.getElementById("divAutomatonGrid"), "on", "off");
+	displayGridFromScratch(ruleMaskGrid, document.getElementById("divRuleMask"), "disabled", "on");
+	displayGridFromScratch(ruleBuildGrid, document.getElementById("divRuleBuild"), "on", "off");
 }
 
 function resizeWindow() {
@@ -88,10 +90,12 @@ function resizeMainGrid() {
 	resizeGrid(document.getElementById("inputGridWidth").value,
 				document.getElementById("inputGridHeight").value,
 				automatonGrid,
-				document.getElementById("divAutomatonGrid"));
+				document.getElementById("divAutomatonGrid"),
+				"on",
+				"off");
 }
 
-function resizeGrid(width, height, grid, root) {
+function resizeGrid(width, height, grid, root, onClass, offClass) {
 	if (width === "") {
 		width = 1;
 	}
@@ -100,7 +104,7 @@ function resizeGrid(width, height, grid, root) {
 	}
 	grid.setWidth(width);
 	grid.setHeight(height);
-	displayGridFromScratch(grid, root);
+	displayGridFromScratch(grid, root, onClass, offClass);
 }
 
 function updateRate() {
@@ -132,22 +136,22 @@ function pauseGrid(event) {
 }
 
 function stepGrid() {
-	displayGridFromChanges(document.getElementById("divAutomatonGrid").firstChild, automatonGrid.tick());
+	displayGridFromChanges(document.getElementById("divAutomatonGrid").firstChild, automatonGrid.tick(), "on", "off");
 }
 
 function checkerGrid() {
 	automatonGrid.checker();
-	displayGridFromScratch(automatonGrid, document.getElementById("divAutomatonGrid"));
+	displayGridFromScratch(automatonGrid, document.getElementById("divAutomatonGrid"), "on", "off");
 }
 
 function scrambleGrid() {
 	automatonGrid.scramble();
-	displayGridFromScratch(automatonGrid, document.getElementById("divAutomatonGrid"));
+	displayGridFromScratch(automatonGrid, document.getElementById("divAutomatonGrid"), "on", "off");
 }
 
 function clearGrid() {
 	automatonGrid.clear();
-	displayGridFromScratch(automatonGrid, document.getElementById("divAutomatonGrid"));
+	displayGridFromScratch(automatonGrid, document.getElementById("divAutomatonGrid"), "on", "off");
 }
 
 function cellMouseDown(event) {
@@ -173,23 +177,54 @@ function cellClicked(event, grid) {
 	var rowIndex = event.target.parentNode.rowIndex;
 	var colIndex = event.target.cellIndex;
 	//Find our parent table
-	var table = event.target.parentNode;
-	while (table.tagName != "TABLE") {
-		table = table.parentNode;
+	var tableClicked = event.target.parentNode;
+	while (tableClicked.tagName != "TABLE") {
+		tableClicked = tableClicked.parentNode;
 	}
-	//TODO: Find a better way to do this.
-	if (table.parentNode.id == "divAutomatonGrid") {
-		automatonGrid.toggle(rowIndex, colIndex);
-	} else if (table.parentNode.id == "divRuleMask") {
-		ruleMaskGrid.toggle(rowIndex, colIndex);
-	} else if (table.parentNode.id == "divRuleBuild") {
+	//TODO: Find a better (more generic) way to do this.
+	if (tableClicked.parentNode.id == "divAutomatonGrid") {
+		mainGridCellClicked(tableClicked, rowIndex, colIndex);
+	} else if (tableClicked.parentNode.id == "divRuleMask") {
+		ruleMaskCellClicked(tableClicked, rowIndex, colIndex);
+	} else if (tableClicked.parentNode.id == "divRuleBuild") {
+		ruleBuildCellClicked(tableClicked, rowIndex, colIndex);
+	}
+}
+
+function mainGridCellClicked(tableClicked, rowIndex, colIndex) {
+	automatonGrid.toggle(rowIndex, colIndex);
+	displayGridFromChanges(tableClicked, [[rowIndex, colIndex]], "on", "off");
+}
+
+function ruleMaskCellClicked(tableClicked, rowIndex, colIndex) {
+	var ruleBuildTable = document.getElementById("divRuleBuild").firstChild;
+	//Disable/enable the cell on the rulemask.
+	ruleMaskGrid.toggle(rowIndex, colIndex);
+	displayGridFromChanges(tableClicked, [[rowIndex, colIndex]], "disabled", "on");
+	if (ruleMaskGrid.get(rowIndex, colIndex)) { //IF DISABLING:
+		//Turn off the cell on the rule builder grid.
+		if (ruleBuildGrid.get(rowIndex, colIndex)) {
+			ruleBuildGrid.toggle(rowIndex, colIndex);
+		}
+		//Disable the cell on the rule builder table.
+		displayGridFromChanges(ruleBuildTable, [[rowIndex, colIndex]], "disabled", "disabled");
+	} else {
+		//IF ENABLING:
+		//Enable the cell on the rule builder table (should be off)
+		displayGridFromChanges(ruleBuildTable, [[rowIndex, colIndex]], "off", "off");
+	}
+}
+
+function ruleBuildCellClicked(tableClicked, rowIndex, colIndex) {
+	//Only change anything if the cell isn't disabled.
+	if (!ruleMaskGrid.get(rowIndex, colIndex)) {
 		ruleBuildGrid.toggle(rowIndex, colIndex);
+		displayGridFromChanges(tableClicked, [[rowIndex, colIndex]], "on", "off");
 	}
-	displayGridFromChanges(table, [[rowIndex, colIndex]]);
 }
 
 //Clears the displayed grid, and displays the given grid under the specified root element.
-function displayGridFromScratch(grid, root) {
+function displayGridFromScratch(grid, root, onClass, offClass) {
 	//Remove and recreate the table.
 	while (root.firstChild) {
 		root.removeChild(root.firstChild);
@@ -202,7 +237,7 @@ function displayGridFromScratch(grid, root) {
 		for (var colIndex = 0; colIndex < grid.width; colIndex++) {
 			var value = grid.get(rowIndex, colIndex);
 			var td = row.insertCell(colIndex);
-			td.className = (value ? "on" : "off");
+			td.className = (value ? onClass : offClass);
 			td.addEventListener("mousedown", cellMouseDown);
 			td.addEventListener("mouseover", cellEntered);
 		}
@@ -212,12 +247,12 @@ function displayGridFromScratch(grid, root) {
 
 //Updates the given table by toggling the given list of cells.
 //Changes is formatted: [[rowIndex, colIndex], [rowIndex, colIndex], ...]
-function displayGridFromChanges(table, changes) {
+function displayGridFromChanges(table, changes, onClass, offClass) {
 	for (var changeIndex in changes) {
 		var rowIndex = changes[changeIndex][0];
 		var colIndex = changes[changeIndex][1];
 		var cell = table.rows[rowIndex].cells[colIndex];
-		cell.className = (cell.className == "on" ? "off" : "on");
+		cell.className = (cell.className == onClass ? offClass : onClass);
 	}
 }
 
@@ -241,7 +276,7 @@ function readRulesetFromFile() {
 
 //Randomizes the rules.
 function randomizeRules() {
-	automatonGrid.ruleset = new Ruleset(random_rules(3));
+	automatonGrid.ruleset = new Ruleset(random_rules(Settings.ruleLength));
 }
 
 //SETTINGS FUNCTIONS
@@ -320,20 +355,35 @@ function validateUpdateRate(event) {
 function decrementRuleLength() {
 	if (Settings.ruleLength > 1) {
 		Settings.ruleLength -= 2;
-		resizeGrid(Settings.ruleLength, Settings.ruleLength, ruleMaskGrid, document.getElementById("divRuleMask"));
-		resizeGrid(Settings.ruleLength, Settings.ruleLength, ruleBuildGrid, document.getElementById("divRuleBuild"));
+		resizeRuleGrids();
 	}
 	document.getElementById("ruleControlLength").innerHTML = Settings.ruleLength;
-	
+	document.getElementById("ruleControlAdvancedLength").innerHTML = Settings.ruleLength;
 }
 
 function incrementRuleLength() {
 	Settings.ruleLength += 2;
 	document.getElementById("ruleControlLength").innerHTML = Settings.ruleLength;
-	resizeGrid(Settings.ruleLength, Settings.ruleLength, ruleMaskGrid, document.getElementById("divRuleMask"));
-	resizeGrid(Settings.ruleLength, Settings.ruleLength, ruleBuildGrid, document.getElementById("divRuleBuild"));
+	document.getElementById("ruleControlAdvancedLength").innerHTML = Settings.ruleLength;
+	resizeRuleGrids();
 }
 
+function resizeRuleGrids() {
+	//Resize both grids
+	resizeGrid(Settings.ruleLength, Settings.ruleLength, ruleMaskGrid, document.getElementById("divRuleMask"), "disabled", "on");
+	resizeGrid(Settings.ruleLength, Settings.ruleLength, ruleBuildGrid, document.getElementById("divRuleBuild"), "on", "off");
+	//Re-disable the cells on the ruleBuildGrid.
+	var ruleBuildTable = document.getElementById("divRuleBuild").firstChild;
+	var disabledList = new Array();
+	for (var rowIndex = 0; rowIndex < ruleMaskGrid.width; rowIndex++) {
+		for (var colIndex = 0; colIndex < ruleMaskGrid.height; colIndex++) {
+			if (ruleMaskGrid.get(rowIndex, colIndex)) {
+				disabledList.push([rowIndex, colIndex]);
+			}
+		}
+	}
+	displayGridFromChanges(ruleBuildTable, disabledList, "disabled", "disabled");
+}
 
 window.onload = init;
 window.onresize = resizeWindow;

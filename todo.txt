@@ -1,0 +1,8 @@
+Known Issues:
+- Attempting to stop click/drag out of the window breaks.
+	1a. You can click/drag between both grids in the rule/mask builder.
+- Find a better way of passing onClass/offClass, and finding which grid is clicked.
+- Add support for even rule lengths (shave off the corners)
+- Make more methods support "displayGridFromChanges" to speed things up.
+- Add "current mask" to rules tab
+- Make random rules obey mask
