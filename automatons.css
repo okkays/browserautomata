@@ -19,6 +19,7 @@ body {
 	-moz-user-select: none;     /* Firefox all */
 	-ms-user-select: none;      /* IE 10+ */
 	cursor:default;
+	overflow:hidden;
 }
 
 /*CONTROL BUTTON STUFF*/
@@ -209,6 +210,8 @@ div.settingsPaneHalf {
 	float:left;
 	width:50%;
 	height:100%;
+	overflow-y:scroll;
+	padding:1em;
 }
 
 div.ruleHeader {
@@ -217,13 +220,14 @@ div.ruleHeader {
 	height:10%;
 	width:100%;
 	text-align:center;
+	overflow:hidden;
 }
 
-div.ruleChangeContent {
-	padding:2%;
-	height:90%;
+div.ruleSubheader {
+	height:5%;
+	text-align:center;
 	width:100%;
-	line-height:1.5em;
+	overflow:hidden;
 }
 
 div.ruleWrapper {
@@ -260,4 +264,8 @@ div.ruleControlOutput {
 input[type="file"] {
 	background-color:white;
 	border-radius: 2px;
+}
+
+input[type="text"] {
+	width:4em;
 }

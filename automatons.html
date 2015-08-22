@@ -31,31 +31,47 @@
 					</div>
 					<div class="settingsPaneRow">
 						<div id="paneGrid" class="settingsPaneSelected">
-							<div>
-								Width: <input id="inputGridWidth" type="text" value="100"/>
-								Height: <input id="inputGridHeight" type="text" value="100"/>
-								<input id="buttonUpdateGridSize" type="button" value="Apply"/>
-								<br/>
-								<input id="buttonCheckerGrid" type="button" value="Checker Grid"/>
-								<input id="buttonScrambleGrid" type="button" value="Scramble Grid"/>
-								<input id="buttonClearGrid" type="button" value="Clear Grid"/>
-								<br/>
-								<input id="inputUpdateRate" type="text" value="1000"/>
-								<input id="buttonUpdateRate" type="button" value="Apply"/>
+							<div class="settingsPaneHalf">
+								<div class="ruleHeader">How-to</div>
+								<p>This is a 'zero-player game' inspired by Conway's Game of Life.  The game consists of a grid of cells changing over time.</p>
+								<div class="ruleSubheader">The Grid</div>
+								<p>The grid is the game's playing field, and the cells are its players.  Each cell on the grid can be either on or off (red or green)</p>
+								<p>Each of the cells 'decide' whether to change at set time intervals called updates.  To decide, they look at their state (on or off), and the state of the cells surrounding them.  They then and check a set of rules.</p>
+								<div class="ruleSubheader">Rules</div>
+								<p>The rules are an exhaustive set of every possible combination of states that the cell and each surrounding cell could be, coupled with the state the cell should change to.</p>
+								<p>To change the rules, go to the 'Rules' tab.  There, you can choose to randomize the rules, upload a ruleset, or modify the current ruleset in your browser.</p>
+								<div class="ruleSubheader">Rule Mask</div>
+								<p>On the right side of the Rules tab, you can edit the Rule Mask.  The Rule Mask controls which of the surrounding cells are considered during updates.  Blue means they aren't looked at, green means they are.  Changing the number below the rule mask changes how many rows/columns of surrounding cells the cell looks at.</p>
+								<p>
+							</div>
+							<div class="settingsPaneHalf">
+								<div class="ruleHeader">Grid Settings</div>
+								<p>
+									Width: <input id="inputGridWidth" type="text" value="100"/>
+									Height: <input id="inputGridHeight" type="text" value="100"/>
+									<input id="buttonUpdateGridSize" type="button" value="Apply"/>
+								</p>
+								<p>
+									Reset Grid:
+									<input id="buttonCheckerGrid" type="button" value="Checker Grid"/>
+									<input id="buttonScrambleGrid" type="button" value="Scramble Grid"/>
+									<input id="buttonClearGrid" type="button" value="Clear Grid"/>
+								</p>
+								<p>
+									Update Rate (milliseconds):
+									<input id="inputUpdateRate" type="text" value="1000"/>
+									<input id="buttonUpdateRate" type="button" value="Apply"/>
+								</p>
 							</div>
 						</div>
 						<div id="paneRules" class="settingsPane">
 							<div class="settingsPaneHalf">
 								<div class="ruleHeader">Change Ruleset</div>
-								<div class="ruleChangeContent">
-									Upload a ruleset:<br/>
-									<input type="file" id="fileRule"/> <input type="button" id="buttonRuleset" value="Apply"/><br/>
-									Randomize ruleset:<br/>
-									<input id="buttonRandomizeRuleset" type="button" value="Randomize"/><br/>
-									Ruleset settings:<br/>
-									<input type="checkbox">TODO: Enable mask</input><br/>
-									<input type="checkbox">TODO: Disable "flashing" random rules</input>
-								</div>
+								<p>Upload a ruleset:
+								<input type="file" id="fileRule"/> <input type="button" id="buttonRuleset" value="Apply"/></p>
+								<p>Randomize ruleset:
+								<input id="buttonRandomizeRuleset" type="button" value="Randomize"/></p>
+								
 							</div>
 							<div class="settingsPaneHalf">
 								<div class="ruleHeader">Edit Rule Mask</div>

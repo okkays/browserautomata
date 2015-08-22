@@ -89,6 +89,7 @@ function resizeSettingsText() {
 	resizeElementText("ruleControlLength");
 	resizeElementText("ruleControlPlus");
 	resizeClassText("ruleHeader");
+	resizeClassText("ruleSubheader");
 }
 
 //GRID FUNCTIONS
