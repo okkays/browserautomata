@@ -6,6 +6,11 @@
 	0:Automaton Grid
 */
 
+/* Disabled to ship v1 */
+div#tabAdvanced {
+	display:none;
+}
+
 body {
 	padding:0px;
 	margin:0px;
