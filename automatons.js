@@ -59,6 +59,7 @@ function init() {
 	GUIStatus.prevGridHeightInput = document.getElementById("inputGridHeight").value;
 	GUIStatus.prevGridWidthInput = document.getElementById("inputGridWidth").value;
 	GUIStatus.prevUpdateRateInput =  document.getElementById("inputUpdateRate").value;
+	Settings.ruleLength = Number(document.getElementById("ruleControlLength").innerHTML);
 	
 	//Pause everything
 	pauseGrid();

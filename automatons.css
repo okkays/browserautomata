@@ -214,6 +214,11 @@ div.settingsPaneHalf {
 	padding:1em;
 }
 
+textarea#textareaRuleset {
+	width:100%;
+	height:100%;
+}
+
 div.ruleHeader {
 	box-sizing:inherit;
 	padding:2%;
