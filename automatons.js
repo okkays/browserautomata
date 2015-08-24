@@ -349,7 +349,9 @@ function updateRulesetFormatString() {
 }
 
 function updateRuleset() {
-	
+	var ruleString = document.getElementById("textareaRuleset").value;
+	var formatString = automatonGrid.ruleset.formatString;
+	automatonGrid.ruleset = new Ruleset(parse_ruleset(ruleString, formatString), formatString);
 }
 
 function updateFormatString() {

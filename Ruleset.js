@@ -147,3 +147,41 @@ function random_rules(length) {
 	}
 	return rules;
 }
+
+//Creates a ruleset from a single string of rules and their corresponding format string.
+//Returns a string that can be passed to Ruleset constructor.
+function parse_ruleset(rulesetString, formatString) {
+	ruleLength = formatString.replace(/\{(\d+|B)\}/g, 'x').length;
+	//Figure out which bits are which.
+	bitLocations = Array();
+	var bLocation;
+	var markerIndex = -1;
+	var choppedNum = 0;
+	while ((markerIndex = formatString.search(/\{(\d+|B)\}/g)) != -1) {
+		var bitNum = '';
+		for (var i = markerIndex + 1; formatString[i] != '}'; i++) {
+			bitNum += formatString[i];
+		}
+		if (bitNum == 'B') {
+			bLocation = markerIndex + choppedNum;
+		} else {
+			bitLocations[Number(bitNum)] = markerIndex + choppedNum;
+		}
+		choppedNum += markerIndex + 1;
+		formatString = formatString.substring(markerIndex + bitNum.length + 2);
+	}
+	//console.log(bitLocations);
+	//console.log(bLocation);
+	//console.log(formatString);
+	//Extract the rules.
+	rules = Array();
+	for (var i = 0; i < rulesetString.length; i += ruleLength + 1) {
+		var formattedRule = rulesetString.substring(i, i + ruleLength);
+		var parsedRule = '';
+		for (var j = 0; j < bitLocations.length; j++) {
+			parsedRule += formattedRule[bitLocations[j]];
+		}
+		rules.push(parsedRule + formattedRule[bLocation]);
+	}
+	return rules;
+}
