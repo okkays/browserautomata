@@ -33,14 +33,15 @@
 						<div id="paneGrid" class="settingsPaneSelected">
 							<div class="settingsPaneHalf">
 								<div class="ruleHeader">How-to</div>
-								<p>This is a 'zero-player game' inspired by Conway's Game of Life.  The game consists of a grid of cells changing over time.</p>
+								<p>This is a 'zero-player game' inspired by Conway's Game of Life.  The game consists of a grid of cells changing over time.  All you have to do is decide on the rules, and press play.</p>
 								<div class="ruleSubheader">The Grid</div>
-								<p>The grid is the game's playing field, and the cells are its players.  Each cell on the grid can be either on or off (red or green)</p>
+								<p>The grid is the game's playing field, and the cells are its players.  Each cell on the grid can be either on or off (red or green).  Clicking a cell will change its state (Close the settings window and try it).</p>
 								<p>Each of the cells 'decide' whether to change at set time intervals called updates.  To decide, they look at their state (on or off), and the state of the cells surrounding them.  They then and check a set of rules.</p>
 								<div class="ruleSubheader">Rules</div>
 								<p>The rules are an exhaustive set of every possible combination of states that the cell and each surrounding cell could be, coupled with the state the cell should change to.</p>
 								<p>To change the rules, go to the 'Rules' tab.  There, you can choose to randomize the rules, upload a ruleset, or modify the current ruleset in your browser.</p>
-								<div class="ruleSubheader">Rule Mask</div>
+								<p>Each of the rules is separated by a newline.  The format string describes the layout of the cells in each rule, with B representing the next state.</p>
+								<div class="ruleSubheader">Rule Mask (not working yet)</div>
 								<p>On the right side of the Rules tab, you can edit the Rule Mask.  The Rule Mask controls which of the surrounding cells are considered during updates.  Blue means they aren't looked at, green means they are.  Changing the number below the rule mask changes how many rows/columns of surrounding cells the cell looks at.</p>
 								<p>
 							</div>
