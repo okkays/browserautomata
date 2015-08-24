@@ -9,7 +9,7 @@ A '0' indicates that the cell is off.
 A '1' indicates that the cell is on.
 The final bit indicates the next state of the center cell.
 
-The length of each rule, and number of rules, it determined by the
+The length of each rule, and number of rules, is determined by the
 'length' of the ruleset, where:
 len(rule) == (length^2) + 1
 len(ruleset) == 2^(length^2)
@@ -42,9 +42,10 @@ Glossary:
 -Static Ruleset: A ruleset where B == center cell
 */
 
-//Takes the length of the ruleset, and an array of strings with rules (as above).
-//If ruleset is null, ruleset will be length 1 and static.
-function Ruleset(rules) {
+//Takes an array of strings with rules (as above).
+//If rules is null, ruleset will be length 1 and static.
+//If the formatString is not given or is null, generate_format_string will be called to create it.
+function Ruleset(rules, formatString) {
 	this.rules = new Object(); //Associative array
 	if (rules == null) {
 		this.length = 1;
@@ -65,6 +66,11 @@ function Ruleset(rules) {
 			this.rules[criteria] = value;
 		}
 	}
+	
+	//Format String
+	this.formatString =
+		(typeof formatString === 'undefined' || formatString == null) ?
+		generate_format_string(this.length) : formatString;
 }
 
 //Returns true/false if the cell at row/colIndex should be on/off in the next iteration.
@@ -75,6 +81,33 @@ Ruleset.prototype.evaluate_cell = function(automatonGrid, rowIndex, colIndex) {
 		return false;
 	}
 	return value;
+}
+
+//Returns a string representation of the ruleset.
+//If a format string is given, the digits of each rule will be inserted in the order given.
+//A format string consists of the index numbers of each cell enclosed in '{}', with a 'B' for the value bit.
+//The characters '{' and '}' are reserved and cannot be used in the format string for any other purpose.
+//For example:
+//Format string 'Row 3: {9}{8}{7}\nRow 2: {6}{5}{4}\nRow 1: {3}{2}{1}\nValue Bit: {B}' for rule 1001101110 will produce:
+//Row 3: 111
+//Row 2: 011
+//Row 1: 001
+//Value Bit: 0
+Ruleset.prototype.to_string = function() {
+	//Set the formatString if it wasn't passed in.
+	retString = '';
+	for (var rule in this.rules) {
+		if (!this.rules.hasOwnProperty(rule)) {
+			continue;
+		}
+		//Replace the markers of format string with values from the current rule.
+		retString += this.formatString.replace(/\{(\d+)\}/g, function(matched) {
+			return rule.charAt(Number(matched.replace(/\{|\}/g, '')));
+		});
+		retString = retString.replace(/\{B\}/, this.rules[rule] ? '1' : '0');
+		retString += '\n';
+	}
+	return retString;
 }
 
 //Reads the criteria bits given a grid, ruleset length, and position of the center bit.
@@ -90,6 +123,16 @@ function criteria_from_grid(automatonGrid, length, rowIndex, colIndex) {
 		}
 	}
 	return criteriaString;
+}
+
+//Creates a default formatString of '{1}{2}...{length}{B}'
+function generate_format_string(length) {
+	var formatString = '';
+	for (var i = 0; i < length * length; i++) {
+		formatString += '{' + i.toString() + '}';
+	}
+	formatString += '{B}';
+	return formatString;
 }
 
 //Creates a list of random rules of given length.

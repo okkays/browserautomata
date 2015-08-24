@@ -11,8 +11,7 @@ var GUIStatus = {
 
 //Contains user-specified information about the grid.
 var Settings = {
-	updateRate: 0,
-	ruleLength: 1
+	updateRate: 0
 };
 
 //The data model grids.
@@ -48,7 +47,9 @@ function init() {
 	document.getElementById("inputUpdateRate").addEventListener("input", validateUpdateRate);
 	document.getElementById("buttonUpdateRate").addEventListener("click", updateRate);
 	//Settings - Rules
-	document.getElementById("buttonRuleset").addEventListener("click", readRulesetFromFile);
+	document.getElementById("buttonFileRuleset").addEventListener("click", readRulesetFromFile);
+	document.getElementById("buttonRuleset").addEventListener("click", updateRuleset);
+	document.getElementById("buttonFormatString").addEventListener("click", updateFormatString);
 	document.getElementById("buttonRandomizeRuleset").addEventListener("click", randomizeRules);
 	document.getElementById("ruleControlMinus").addEventListener("click", decrementRuleLength);
 	document.getElementById("ruleControlPlus").addEventListener("click", incrementRuleLength);
@@ -59,7 +60,8 @@ function init() {
 	GUIStatus.prevGridHeightInput = document.getElementById("inputGridHeight").value;
 	GUIStatus.prevGridWidthInput = document.getElementById("inputGridWidth").value;
 	GUIStatus.prevUpdateRateInput =  document.getElementById("inputUpdateRate").value;
-	Settings.ruleLength = Number(document.getElementById("ruleControlLength").innerHTML);
+	var defaultWidth = document.getElementById("inputGridWidth").value;
+	var defaultHeight = document.getElementById("inputGridHeight").value;
 	
 	//Pause everything
 	pauseGrid();
@@ -67,16 +69,21 @@ function init() {
 	//Set the size of the tab item text
 	resizeSettingsText();
 	
-	//Create the grid
-	var defaultWidth = document.getElementById("inputGridWidth").value;
-	var defaultHeight = document.getElementById("inputGridHeight").value;
+	//Create the grids
 	automatonGrid = new AutomatonGrid(defaultWidth, defaultHeight, null);
 	automatonGrid.scramble();
-	ruleMaskGrid = new AutomatonGrid(Settings.ruleLength, Settings.ruleLength, null);
-	ruleBuildGrid = new AutomatonGrid(Settings.ruleLength, Settings.ruleLength, null);
+	automatonGrid.ruleset.length = Number(document.getElementById("ruleControlLength").innerHTML);
+	ruleMaskGrid = new AutomatonGrid(automatonGrid.ruleset.length, automatonGrid.ruleset.length, null);
+	ruleBuildGrid = new AutomatonGrid(automatonGrid.ruleset.length, automatonGrid.ruleset.length, null);
 	displayGridFromScratch(automatonGrid, document.getElementById("divAutomatonGrid"), "on", "off");
 	displayGridFromScratch(ruleMaskGrid, document.getElementById("divRuleMask"), "disabled", "on");
 	displayGridFromScratch(ruleBuildGrid, document.getElementById("divRuleBuild"), "on", "off");
+	
+	//Create the ruleset and format string.
+	automatonGrid.ruleset.formatString = generate_format_string(automatonGrid.ruleset.length);
+	randomizeRules();
+	updateRulesetTextarea();
+	updateRulesetFormatString();
 }
 
 function resizeWindow() {
@@ -276,16 +283,78 @@ function readRulesetFromFile() {
 		var contents = event.target.result;
 		automatonGrid.ruleset = new Ruleset(contents.split("\n"));
 		//Update the rule length.
-		Settings.ruleLength = automatonGrid.ruleset.length;
-		document.getElementById("ruleControlLength").innerHTML = Settings.ruleLength;
+		document.getElementById("ruleControlLength").innerHTML = automatonGrid.ruleset.length;
 		resizeRuleGrids();
+		updateRulesetTextarea();
+		updateRulesetFormatString();
 	}
 	reader.readAsText(selector.files[0]);
 }
 
 //Randomizes the rules.
 function randomizeRules() {
-	automatonGrid.ruleset = new Ruleset(random_rules(Settings.ruleLength));
+	automatonGrid.ruleset = new Ruleset(random_rules(automatonGrid.ruleset.length), automatonGrid.ruleset.formatString);
+	updateRulesetTextarea();
+}
+
+function decrementRuleLength() {
+	if (automatonGrid.ruleset.length > 1) {
+		automatonGrid.ruleset.length -= 2;
+		document.getElementById("ruleControlLength").innerHTML = automatonGrid.ruleset.length;
+		resizeRuleGrids();
+		randomizeRules();
+		updateRulesetFormatString();
+	}
+}
+
+function incrementRuleLength() {
+	if (automatonGrid.ruleset.length < 3) {
+		automatonGrid.ruleset.length += 2;
+		document.getElementById("ruleControlLength").innerHTML = automatonGrid.ruleset.length;
+		resizeRuleGrids();
+		randomizeRules();
+		updateRulesetTextarea();
+		updateRulesetFormatString();
+	}
+}
+
+function resizeRuleGrids() {
+	//Resize both grids
+	resizeGrid(automatonGrid.ruleset.length, automatonGrid.ruleset.length, ruleMaskGrid, document.getElementById("divRuleMask"), "disabled", "on");
+	resizeGrid(automatonGrid.ruleset.length, automatonGrid.ruleset.length, ruleBuildGrid, document.getElementById("divRuleBuild"), "on", "off");
+	//Re-disable the cells on the ruleBuildGrid.
+	var ruleBuildTable = document.getElementById("divRuleBuild").firstChild;
+	var disabledList = new Array();
+	for (var rowIndex = 0; rowIndex < ruleMaskGrid.width; rowIndex++) {
+		for (var colIndex = 0; colIndex < ruleMaskGrid.height; colIndex++) {
+			if (ruleMaskGrid.get(rowIndex, colIndex)) {
+				disabledList.push([rowIndex, colIndex]);
+			}
+		}
+	}
+	displayGridFromChanges(ruleBuildTable, ruleBuildGrid, disabledList, "disabled", "disabled");
+	automatonGrid.ruleset.formatString = generate_format_string(automatonGrid.ruleset.length);
+}
+
+function updateRulesetTextarea() {
+	if (automatonGrid.ruleset.length < 5) {
+		document.getElementById('textareaRuleset').value = automatonGrid.ruleset.to_string();
+	} else {
+		document.getElementById('textareaRuleset').value = 'Ruleset too large, use an external editor and upload the file.';
+	}
+}
+
+function updateRulesetFormatString() {
+	document.getElementById('textareaFormatString').value = automatonGrid.ruleset.formatString;
+}
+
+function updateRuleset() {
+	
+}
+
+function updateFormatString() {
+	automatonGrid.ruleset.formatString = document.getElementById('textareaFormatString').value;
+	document.getElementById('textareaRuleset').value = automatonGrid.ruleset.to_string();
 }
 
 //SETTINGS FUNCTIONS
@@ -371,37 +440,6 @@ function validateUpdateRate(event) {
 		event.target.value = Math.floor(input);
 	}
 	GUIStatus.prevUpdateRateInput = event.target.value;
-}
-
-function decrementRuleLength() {
-	if (Settings.ruleLength > 1) {
-		Settings.ruleLength -= 2;
-		resizeRuleGrids();
-	}
-	document.getElementById("ruleControlLength").innerHTML = Settings.ruleLength;
-}
-
-function incrementRuleLength() {
-	Settings.ruleLength += 2;
-	document.getElementById("ruleControlLength").innerHTML = Settings.ruleLength;
-	resizeRuleGrids();
-}
-
-function resizeRuleGrids() {
-	//Resize both grids
-	resizeGrid(Settings.ruleLength, Settings.ruleLength, ruleMaskGrid, document.getElementById("divRuleMask"), "disabled", "on");
-	resizeGrid(Settings.ruleLength, Settings.ruleLength, ruleBuildGrid, document.getElementById("divRuleBuild"), "on", "off");
-	//Re-disable the cells on the ruleBuildGrid.
-	var ruleBuildTable = document.getElementById("divRuleBuild").firstChild;
-	var disabledList = new Array();
-	for (var rowIndex = 0; rowIndex < ruleMaskGrid.width; rowIndex++) {
-		for (var colIndex = 0; colIndex < ruleMaskGrid.height; colIndex++) {
-			if (ruleMaskGrid.get(rowIndex, colIndex)) {
-				disabledList.push([rowIndex, colIndex]);
-			}
-		}
-	}
-	displayGridFromChanges(ruleBuildTable, ruleBuildGrid, disabledList, "disabled", "disabled");
 }
 
 window.onload = init;

@@ -216,7 +216,12 @@ div.settingsPaneHalf {
 
 textarea#textareaRuleset {
 	width:100%;
-	height:100%;
+	height:45%;
+}
+
+textarea#textareaFormatString {
+	width:100%;
+	height:20%;
 }
 
 div.ruleHeader {
