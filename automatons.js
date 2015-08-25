@@ -294,6 +294,17 @@ function readRulesetFromFile() {
 //Randomizes the rules.
 function randomizeRules() {
 	automatonGrid.ruleset = new Ruleset(random_rules(automatonGrid.ruleset.length), automatonGrid.ruleset.formatString);
+	
+	//Make sure there's no flashing.
+	var length = Object.keys(automatonGrid.ruleset.rules)[0].length;
+	var zeroes = '';
+	var ones = '';
+	for (var i = 0; i < length; i++) {
+		zeroes += '0';
+		ones += '1';
+	}
+	automatonGrid.ruleset.rules[zeroes] = automatonGrid.ruleset.rules[ones];
+	
 	updateRulesetTextarea();
 }
 
