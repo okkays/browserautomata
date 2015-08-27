@@ -40,10 +40,16 @@
 								<div class="ruleSubheader">Rules</div>
 								<p>The rules are an exhaustive set of every possible combination of states that the cell and each surrounding cell could be, coupled with the state the cell should change to.</p>
 								<p>To change the rules, go to the 'Rules' tab.  There, you can choose to randomize the rules, upload a ruleset, or modify the current ruleset in your browser.</p>
-								<p>Each of the rules is separated by a newline.  The format string describes the layout of the cells in each rule, with B representing the next state.</p>
-								<div class="ruleSubheader">Rule Mask (not working yet)</div>
-								<p>On the right side of the Rules tab, you can edit the Rule Mask.  The Rule Mask controls which of the surrounding cells are considered during updates.  Blue means they aren't looked at, green means they are.  Changing the number below the rule mask changes how many rows/columns of surrounding cells the cell looks at.</p>
+								<p>Each of the rules is separated by a newline.  The format string describes the layout of the cells in each rule, with numbers representing the cell number, and B representing the next state.</p>
+								<p>The cells in a rule are numbered from left to right, then top to bottom, skipping any masked cells. For example, a rule with a mask of length 3 and the corners masked would read like this:</p>
 								<p>
+									X 0 X<br/>
+									1 2 3<br/>
+									X 4 X<br/>
+								</p>
+								<p>and will resemble: 01101 with the default format string.</p>
+								<div class="ruleSubheader">Rule Mask</div>
+								<p>On the right side of the Rules tab, you can edit the Rule Mask.  The Rule Mask controls which of the surrounding cells are considered during updates.  Blue means they aren't looked at, green means they are.  Changing the number below the rule mask changes how many rows/columns of surrounding cells the cell looks at.</p>
 							</div>
 							<div class="settingsPaneHalf">
 								<div class="ruleHeader">Grid Settings</div>
