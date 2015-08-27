@@ -90,6 +90,21 @@ Ruleset.prototype.evaluate_cell = function(automatonGrid, rowIndex, colIndex) {
 Ruleset.prototype.set_mask = function(maskGrid) {
 	var oldMask = (typeof this.mask === 'undefined') ? '' : this.mask;
 	this.mask = criteria_from_grid(maskGrid, null, this.length, (this.length - 1) / 2, (this.length - 1) / 2);
+	
+	//Make sure we actually need to apply this mask.
+	//By heuristic - check that the length of the first rule is different from mask length.
+	if (oldMask.length == 0) {
+		var numMasked = 0;
+		for (var i = 0; i < this.mask.length; i++) {
+			if (this.mask[i] == '1') {
+				numMasked++;
+			}
+		}
+		if (this.mask.length - numMasked == Object.keys(this.rules)[0].length) {
+			return;
+		}
+	}
+	
 	//Populate arrays with indexes to add/remove from rules.
 	toChange = new Array();
 	//If the new maskbit is different from the old maskbit
@@ -196,15 +211,15 @@ function criteria_from_grid(automatonGrid, mask, length, rowIndex, colIndex) {
 function generate_format_string(length, maskGrid) {
 	var mask = (maskGrid == null || typeof maskGrid === 'undefined') ?
 		'' : criteria_from_grid(maskGrid, null, length, (length - 1) / 2, (length - 1) / 2);
-	var maskedNum = 0;
+	var numMasked = 0;
 	for (var i = 0; i < mask.length; i++) {
 		if (mask[i] == '1') {
-			maskedNum++;
+			numMasked++;
 		}
 	}
 	
 	var formatString = '';
-	for (var i = 0; i < (length * length) - maskedNum; i++) {
+	for (var i = 0; i < (length * length) - numMasked; i++) {
 		formatString += '{' + i.toString() + '}';
 	}
 	
@@ -214,14 +229,24 @@ function generate_format_string(length, maskGrid) {
 
 //Creates a list of random rules of given length.
 //Returns a string that can be passed to Ruleset constructor.
-function random_rules(length, mask) {
+function random_rules(length, maskGrid) {
+	var mask = (maskGrid == null || typeof maskGrid === 'undefined') ?
+		'' : criteria_from_grid(maskGrid, null, length, (length - 1) / 2, (length - 1) / 2);
+	var numMasked = 0;
+	for (var i = 0; i < mask.length; i++) {
+		if (mask[i] == '1') {
+			numMasked++;
+		}
+	}
+	
 	rules = Array();
-	for (var i = 0; i < Math.pow(2, (Math.pow(length, 2))); i++) {
+	for (var i = 0; i < Math.pow(2, (Math.pow(length, 2) - numMasked)); i++) {
 		var binaryIndex = i.toString(2);
-		var leadingZeroes = (Array((Math.pow(length, 2) + 1) - binaryIndex.length).join("0"));
+		var leadingZeroes = (Array((Math.pow(length, 2) - numMasked + 1) - binaryIndex.length).join("0"));
 		var criteria =  leadingZeroes + binaryIndex;
 		rules.push(criteria + (Math.floor(Math.random() * 2) == 1 ? "1" : "0"));
 	}
+
 	return rules;
 }
 

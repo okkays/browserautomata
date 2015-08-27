@@ -298,7 +298,7 @@ function readRulesetFromFile() {
 
 //Randomizes the rules.
 function randomizeRules() {
-	automatonGrid.ruleset = new Ruleset(random_rules(automatonGrid.ruleset.length), ruleMaskGrid, automatonGrid.ruleset.formatString);
+	automatonGrid.ruleset = new Ruleset(random_rules(automatonGrid.ruleset.length, ruleMaskGrid), ruleMaskGrid, automatonGrid.ruleset.formatString);
 	
 	//Make sure there's no flashing.
 	var length = Object.keys(automatonGrid.ruleset.rules)[0].length;
