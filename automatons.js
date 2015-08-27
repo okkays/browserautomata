@@ -225,6 +225,9 @@ function ruleMaskCellClicked(tableClicked, rowIndex, colIndex) {
 		//Enable the cell on the rule builder table
 		displayGridFromChanges(ruleBuildTable, ruleBuildGrid, [[rowIndex, colIndex]], "on", "off");
 	}
+	//Set the mask.
+	automatonGrid.ruleset.set_mask(ruleMaskGrid);
+	updateRulesetTextarea();
 }
 
 function ruleBuildCellClicked(tableClicked, rowIndex, colIndex) {
@@ -281,7 +284,7 @@ function readRulesetFromFile() {
 	var reader = new FileReader();
 	reader.onload = function(event) {
 		var contents = event.target.result;
-		automatonGrid.ruleset = new Ruleset(contents.split("\n"));
+		automatonGrid.ruleset = new Ruleset(contents.split("\n"), ruleMaskGrid, null);
 		//Update the rule length.
 		document.getElementById("ruleControlLength").innerHTML = automatonGrid.ruleset.length;
 		resizeRuleGrids();
@@ -293,7 +296,7 @@ function readRulesetFromFile() {
 
 //Randomizes the rules.
 function randomizeRules() {
-	automatonGrid.ruleset = new Ruleset(random_rules(automatonGrid.ruleset.length), automatonGrid.ruleset.formatString);
+	automatonGrid.ruleset = new Ruleset(random_rules(automatonGrid.ruleset.length), ruleMaskGrid, automatonGrid.ruleset.formatString);
 	
 	//Make sure there's no flashing.
 	var length = Object.keys(automatonGrid.ruleset.rules)[0].length;
@@ -362,7 +365,7 @@ function updateRulesetFormatString() {
 function updateRuleset() {
 	var ruleString = document.getElementById("textareaRuleset").value;
 	var formatString = automatonGrid.ruleset.formatString;
-	automatonGrid.ruleset = new Ruleset(parse_ruleset(ruleString, formatString), formatString);
+	automatonGrid.ruleset = new Ruleset(parse_ruleset(ruleString, formatString), ruleMaskGrid, formatString);
 }
 
 function updateFormatString() {

@@ -45,15 +45,15 @@ Glossary:
 //Takes an array of strings with rules (as above).
 //If rules is null, ruleset will be length 1 and static.
 //If the formatString is not given or is null, generate_format_string will be called to create it.
-function Ruleset(rules, formatString) {
+function Ruleset(rules, maskGrid, formatString) {
 	this.rules = new Object(); //Associative array
 	if (rules == null) {
 		this.length = 1;
+		this.mask = '0';
 		this.rules["0"] = false;
 		this.rules["1"] = true;
 	}
 	else {
-		this.length = Math.sqrt(rules[0].trim().length - 1);
 		for (var ruleIndex in rules) {
 			//Allow whitespace/empty lines.
 			var rule = rules[ruleIndex].trim();
@@ -65,6 +65,8 @@ function Ruleset(rules, formatString) {
 			var value = rule.charAt(rule.length - 1) == "1";
 			this.rules[criteria] = value;
 		}
+		this.length = Math.sqrt(rules[0].trim().length - 1);
+		this.set_mask(maskGrid);
 	}
 	
 	//Format String
@@ -81,6 +83,59 @@ Ruleset.prototype.evaluate_cell = function(automatonGrid, rowIndex, colIndex) {
 		return false;
 	}
 	return value;
+}
+
+Ruleset.prototype.set_mask = function(maskGrid) {
+	var oldMask = (typeof this.mask === 'undefined') ? '' : this.mask;
+	this.mask = criteria_from_grid(maskGrid, this.length, (this.length - 1) / 2, (this.length - 1) / 2);
+	
+	//Populate arrays with indexes to add/remove from rules.
+	toChange = new Array();
+	//If the new maskbit is different from the old maskbit
+	var numAlreadyHidden = 0;
+	var i;
+	for (i = 0; i < this.mask.length && i < oldMask.length; i++) {
+		if (this.mask[i] != oldMask[i]) {
+			toChange.push({maskbit:i, rulebit:i - numAlreadyHidden});
+		} else if (oldMask[i] == '1') {
+			numAlreadyHidden++;
+		}
+	}
+	//If the mask is longer, but we need to hide the cell.
+	for (; i < this.mask.length; i++) {
+		if (this.mask[i] == '1') {
+			toChange.push({maskbit:i, rulebit:i - numAlreadyHidden});
+		}
+	}
+	
+	if (toChange.length == 0) {
+		return; //Nothing to change
+	}
+	
+	//Either trim or expand the ruleset based on the mask
+	newRules = new Object(); //Associative array 
+	for (var rule in this.rules) {
+		if (!this.rules.hasOwnProperty(rule)) {
+			continue;
+		}
+		var newRule = rule;
+		for (var j = toChange.length - 1; j >= 0; j--) {
+			if (this.mask[toChange[j]['maskbit']] == '1') {
+				var newRuleRemoved = newRule.substring(0, toChange[j]['rulebit']) + newRule.substring(toChange[j]['rulebit'] + 1);
+				//Make sure it's not already on the list.
+				if (!newRules.hasOwnProperty(newRuleRemoved)) {
+					newRules[newRuleRemoved] = this.rules[newRule];
+				}
+			}
+			else { // '0'
+				//Add both 0 and 1 rules.
+				newRules[newRule.substring(0, toChange[j]['rulebit']) + '0' + newRule.substring(toChange[j]['rulebit'])] = this.rules[newRule];
+				newRules[newRule.substring(0, toChange[j]['rulebit']) + '1' + newRule.substring(toChange[j]['rulebit'])] = this.rules[newRule];
+			}
+		}
+	}
+	
+	this.rules = newRules;
 }
 
 //Returns a string representation of the ruleset.
@@ -137,7 +192,7 @@ function generate_format_string(length) {
 
 //Creates a list of random rules of given length.
 //Returns a string that can be passed to Ruleset constructor.
-function random_rules(length) {
+function random_rules(length, mask) {
 	rules = Array();
 	for (var i = 0; i < Math.pow(2, (Math.pow(length, 2))); i++) {
 		var binaryIndex = i.toString(2);
@@ -170,9 +225,7 @@ function parse_ruleset(rulesetString, formatString) {
 		choppedNum += markerIndex + 1;
 		formatString = formatString.substring(markerIndex + bitNum.length + 2);
 	}
-	//console.log(bitLocations);
-	//console.log(bLocation);
-	//console.log(formatString);
+	
 	//Extract the rules.
 	rules = Array();
 	for (var i = 0; i < rulesetString.length; i += ruleLength + 1) {
