@@ -54,6 +54,8 @@ function Ruleset(rules, maskGrid, formatString) {
 		this.rules["1"] = true;
 	}
 	else {
+		this.length = maskGrid == null || typeof maskGrid === 'undefined' ? 
+			Math.sqrt(rules[0].trim().length - 1) : maskGrid.width;
 		for (var ruleIndex in rules) {
 			//Allow whitespace/empty lines.
 			var rule = rules[ruleIndex].trim();
@@ -65,20 +67,20 @@ function Ruleset(rules, maskGrid, formatString) {
 			var value = rule.charAt(rule.length - 1) == "1";
 			this.rules[criteria] = value;
 		}
-		this.length = Math.sqrt(rules[0].trim().length - 1);
+		
 		this.set_mask(maskGrid);
 	}
 	
 	//Format String
 	this.formatString =
 		(typeof formatString === 'undefined' || formatString == null) ?
-		generate_format_string(this.length) : formatString;
+		generate_format_string(this.length, maskGrid) : formatString;
 }
 
 //Returns true/false if the cell at row/colIndex should be on/off in the next iteration.
 Ruleset.prototype.evaluate_cell = function(automatonGrid, rowIndex, colIndex) {
 	//Read the criteria string, then return the value matching it.
-	var value = this.rules[criteria_from_grid(automatonGrid, this.length, rowIndex, colIndex)];
+	var value = this.rules[criteria_from_grid(automatonGrid, this.mask, this.length, rowIndex, colIndex)];
 	if (typeof(value) == "undefined") { //Catch missing rules
 		return false;
 	}
@@ -87,8 +89,7 @@ Ruleset.prototype.evaluate_cell = function(automatonGrid, rowIndex, colIndex) {
 
 Ruleset.prototype.set_mask = function(maskGrid) {
 	var oldMask = (typeof this.mask === 'undefined') ? '' : this.mask;
-	this.mask = criteria_from_grid(maskGrid, this.length, (this.length - 1) / 2, (this.length - 1) / 2);
-	
+	this.mask = criteria_from_grid(maskGrid, null, this.length, (this.length - 1) / 2, (this.length - 1) / 2);
 	//Populate arrays with indexes to add/remove from rules.
 	toChange = new Array();
 	//If the new maskbit is different from the old maskbit
@@ -167,25 +168,46 @@ Ruleset.prototype.to_string = function() {
 
 //Reads the criteria bits given a grid, ruleset length, and position of the center bit.
 //Returns a string of '0's and '1's
-function criteria_from_grid(automatonGrid, length, rowIndex, colIndex) {
+function criteria_from_grid(automatonGrid, mask, length, rowIndex, colIndex) {
 	var criteriaString = "";
+	//If mask is empty, don't mask.
+	if (mask == null || typeof mask === 'undefined') {
+		mask = '';
+		for (var i = 0; i < length * length; i++) {
+			mask += '0';
+		}
+	}
+
 	var range = (length - 1) / 2;
 	for (var i = -range; i <= range; i++) {
 		var testRowIndex = (rowIndex + i);
 		for (var j = -range; j <= range; j++) {
 			var testColIndex = (colIndex + j);
-			criteriaString += (automatonGrid.get(testRowIndex, testColIndex) ? "1" : "0");
+			if (mask[((i + range) * length) + (j + range)] == '0') {
+				criteriaString += (automatonGrid.get(testRowIndex, testColIndex) ? "1" : "0");
+			}
 		}
 	}
+	
 	return criteriaString;
 }
 
 //Creates a default formatString of '{1}{2}...{length}{B}'
-function generate_format_string(length) {
+function generate_format_string(length, maskGrid) {
+	var mask = (maskGrid == null || typeof maskGrid === 'undefined') ?
+		'' : criteria_from_grid(maskGrid, null, length, (length - 1) / 2, (length - 1) / 2);
+	var maskedNum = 0;
+	for (var i = 0; i < mask.length; i++) {
+		if (mask[i] == '1') {
+			maskedNum++;
+		}
+	}
+	
 	var formatString = '';
-	for (var i = 0; i < length * length; i++) {
+	for (var i = 0; i < (length * length) - maskedNum; i++) {
 		formatString += '{' + i.toString() + '}';
 	}
+	
 	formatString += '{B}';
 	return formatString;
 }

@@ -80,10 +80,10 @@ function init() {
 	displayGridFromScratch(ruleBuildGrid, document.getElementById("divRuleBuild"), "on", "off");
 	
 	//Create the ruleset and format string.
-	automatonGrid.ruleset.formatString = generate_format_string(automatonGrid.ruleset.length);
+	automatonGrid.ruleset.formatString = generate_format_string(automatonGrid.ruleset.length, ruleMaskGrid);
 	randomizeRules();
 	updateRulesetTextarea();
-	updateRulesetFormatString();
+	updateFormatStringTextarea();
 }
 
 function resizeWindow() {
@@ -227,7 +227,9 @@ function ruleMaskCellClicked(tableClicked, rowIndex, colIndex) {
 	}
 	//Set the mask.
 	automatonGrid.ruleset.set_mask(ruleMaskGrid);
+	automatonGrid.ruleset.formatString = generate_format_string(automatonGrid.ruleset.length, ruleMaskGrid);
 	updateRulesetTextarea();
+	updateFormatStringTextarea();
 }
 
 function ruleBuildCellClicked(tableClicked, rowIndex, colIndex) {
@@ -289,7 +291,7 @@ function readRulesetFromFile() {
 		document.getElementById("ruleControlLength").innerHTML = automatonGrid.ruleset.length;
 		resizeRuleGrids();
 		updateRulesetTextarea();
-		updateRulesetFormatString();
+		updateFormatStringTextarea();
 	}
 	reader.readAsText(selector.files[0]);
 }
@@ -317,7 +319,7 @@ function decrementRuleLength() {
 		document.getElementById("ruleControlLength").innerHTML = automatonGrid.ruleset.length;
 		resizeRuleGrids();
 		randomizeRules();
-		updateRulesetFormatString();
+		updateFormatStringTextarea();
 	}
 }
 
@@ -328,7 +330,7 @@ function incrementRuleLength() {
 		resizeRuleGrids();
 		randomizeRules();
 		updateRulesetTextarea();
-		updateRulesetFormatString();
+		updateFormatStringTextarea();
 	}
 }
 
@@ -347,7 +349,7 @@ function resizeRuleGrids() {
 		}
 	}
 	displayGridFromChanges(ruleBuildTable, ruleBuildGrid, disabledList, "disabled", "disabled");
-	automatonGrid.ruleset.formatString = generate_format_string(automatonGrid.ruleset.length);
+	automatonGrid.ruleset.formatString = generate_format_string(automatonGrid.ruleset.length, ruleMaskGrid);
 }
 
 function updateRulesetTextarea() {
@@ -358,7 +360,7 @@ function updateRulesetTextarea() {
 	}
 }
 
-function updateRulesetFormatString() {
+function updateFormatStringTextarea() {
 	document.getElementById('textareaFormatString').value = automatonGrid.ruleset.formatString;
 }
 
