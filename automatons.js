@@ -46,6 +46,9 @@ function init() {
 	document.getElementById("buttonClearGrid").addEventListener("click", clearGrid);
 	document.getElementById("inputUpdateRate").addEventListener("input", validateUpdateRate);
 	document.getElementById("buttonUpdateRate").addEventListener("click", updateRate);
+	document.getElementById("buttonOnColor").addEventListener("click", updateOnColor);
+	document.getElementById("buttonOffColor").addEventListener("click", updateOffColor);
+	document.getElementById("buttonDisabledColor").addEventListener("click", updateDisabledColor);
 	//Settings - Rules
 	document.getElementById("buttonFileRuleset").addEventListener("click", readRulesetFromFile);
 	document.getElementById("buttonRuleset").addEventListener("click", updateRuleset);
@@ -133,6 +136,36 @@ function updateRate() {
 		clearInterval(GUIStatus.pauseInterval);
 		GUIStatus.pauseInterval = setInterval(stepGrid, Settings.updateRate);
 	}
+}
+
+function updateColor (cssSelector, newColor) {
+	//Find the cssRule we need.
+	for (var i = 0; i < document.styleSheets.length; i++) {
+		var sheet = document.styleSheets[i];
+		console.log(sheet);
+		var rules = sheet.cssRules || sheet.rules; //sheet.rules for IE.
+		for (var j = 0; j < rules.length; j++) {
+			var rule = rules[j];
+			//console.log(rule.cssText);
+			if (rule.cssText.lastIndexOf(cssSelector, 0) === 0) { //startswith
+				rule.style.backgroundColor = newColor;
+				console.log('hit');
+				break;
+			}
+		}
+	}
+}
+
+function updateOnColor() {
+	updateColor('table.automatonTable td.on', document.getElementById('inputOnColor').value);
+}
+
+function updateOffColor() {
+	updateColor('table.automatonTable td.off', document.getElementById('inputOffColor').value);
+}
+
+function updateDisabledColor() {
+	updateColor('table.automatonTable td.disabled', document.getElementById('inputDisabledColor').value);
 }
 
 function playGrid(event) {
